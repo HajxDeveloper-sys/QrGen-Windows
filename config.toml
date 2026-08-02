@@ -1,0 +1,11 @@
+[app]
+language = "tr"
+theme = "light"
+default_export_format = "png"
+
+[qr_defaults]
+box_size = 10
+border = 4
+error_correction = "M"
+fill_color = "#000000"
+back_color = "#FFFFFF"
