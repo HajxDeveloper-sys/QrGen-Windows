@@ -97,10 +97,10 @@ class QRCodeEngine:
         if image.mode in ('RGBA', 'LA') or (image.mode == 'P' and 'transparency' in image.info):
             bg = Image.new('RGB', image.size, back_color)
             bg.paste(image, mask=image.split()[3])
-            bg.save(file_path, "JPEG", quality=95)
+            bg.save(file_path, "JPEG", quality=95, subsampling=0)
         else:
             rgb_image = image.convert('RGB')
-            rgb_image.save(file_path, "JPEG", quality=95)
+            rgb_image.save(file_path, "JPEG", quality=95, subsampling=0)
 
     def save_as_svg(
         self,
@@ -134,18 +134,31 @@ class QRCodeEngine:
         qr.add_data(data)
         qr.make(fit=True)
 
+        total_modules = qr.modules_count + border * 2
+
         factory = qrcode.image.svg.SvgPathImage
         svg_img = qr.make_image(image_factory=factory)
 
         root = svg_img._img
 
-        # 1. Insert background rect covering 100% of SVG
+        # Remove physical mm dimensions and set responsive, centered SVG attributes
+        root.attrib.pop("width", None)
+        root.attrib.pop("height", None)
+        root.attrib["viewBox"] = f"0 0 {total_modules} {total_modules}"
+        root.attrib["width"] = "100%"
+        root.attrib["height"] = "100%"
+        root.attrib["preserveAspectRatio"] = "xMidYMid meet"
+        root.attrib["shape-rendering"] = "crispEdges"
+        root.attrib["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
+        root.attrib["style"] = "width: 100%; height: 100%; max-width: 100%; max-height: 100%; display: block; margin: auto;"
+
+        # 1. Insert background rect covering exact total_modules area
         bg_rect = ET.Element(
             "rect",
             x="0",
             y="0",
-            width="100%",
-            height="100%",
+            width=str(total_modules),
+            height=str(total_modules),
             fill=back_color
         )
         root.insert(0, bg_rect)
@@ -166,7 +179,6 @@ class QRCodeEngine:
             mime = f"image/{ext}" if ext in ["png", "jpeg", "gif", "svg+xml"] else "image/png"
             data_url = f"data:{mime};base64,{encoded_logo}"
 
-            total_modules = qr.modules_count + border * 2
             logo_size_mod = total_modules * 0.22
             padding_mod = logo_size_mod * 0.12
             box_size_mod = logo_size_mod + 2 * padding_mod
@@ -191,7 +203,9 @@ class QRCodeEngine:
                 height=str(logo_size_mod),
                 href=data_url
             )
+            logo_elem.set("{http://www.w3.org/1999/xlink}href", data_url)
             root.append(logo_elem)
 
         svg_img.save(file_path)
+
 
