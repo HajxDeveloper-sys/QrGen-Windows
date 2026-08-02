@@ -7,7 +7,7 @@ import ctypes
 
 from src.config_manager import ConfigManager
 from src.i18n import I18nManager
-from src.qr_engine import QRCodeEngine
+from src.qr_engine import QRCodeEngine, calculate_contrast_ratio, is_inverted
 from src.wifi_engine import WiFiQREngine
 from src.vcard_engine import VCardEngine
 from src.utils import validate_url, get_timestamp_string
@@ -301,6 +301,27 @@ class QRCodeGeneratorApp(ctk.CTk):
         self.logo_status_label = ctk.CTkLabel(self.custom_frame, text="", font=ctk.CTkFont(size=11))
         self.logo_status_label.grid(row=1, column=3, columnspan=1, padx=5, pady=0, sticky="w")
 
+        self.contrast_warning_label = ctk.CTkLabel(
+            self.custom_frame,
+            text="",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#EF4444",
+            wraplength=400
+        )
+        self.contrast_warning_label.grid(row=3, column=0, columnspan=3, padx=5, pady=(5, 5), sticky="w")
+
+        self.fix_contrast_button = ctk.CTkButton(
+            self.custom_frame,
+            text=self.i18n.get("btn_fix_contrast"),
+            command=self._fix_color_contrast,
+            height=32,
+            fg_color="#D97706",
+            hover_color="#B45309"
+        )
+        self.fix_contrast_button.grid(row=3, column=3, padx=5, pady=(5, 5), sticky="ew")
+
+        self._check_contrast()
+
     def _build_action_buttons(self):
         self.action_frame = ctk.CTkFrame(self.left_frame, fg_color="transparent")
         self.action_frame.grid(row=3, column=0, padx=10, pady=(5, 10), sticky="ew")
@@ -382,27 +403,70 @@ class QRCodeGeneratorApp(ctk.CTk):
         self.preview_ctk_image = ctk.CTkImage(light_image=image_copy, dark_image=image_copy, size=image_copy.size)
         self.preview_image_label.configure(image=self.preview_ctk_image, text="")
 
+    def _check_contrast(self):
+        ratio = calculate_contrast_ratio(self.fill_color, self.back_color)
+        inverted = is_inverted(self.fill_color, self.back_color)
+
+        if inverted:
+            self.contrast_warning_label.configure(
+                text=self.i18n.get("warn_inverted"),
+                text_color="#EF4444"
+            )
+            self.fix_contrast_button.grid()
+        elif ratio < 4.0:
+            self.contrast_warning_label.configure(
+                text=f"{self.i18n.get('warn_low_contrast')} (1:{ratio:.1f})",
+                text_color="#F59E0B"
+            )
+            self.fix_contrast_button.grid()
+        else:
+            self.contrast_warning_label.configure(text="")
+            self.fix_contrast_button.grid_remove()
+
+    def _fix_color_contrast(self):
+        inverted = is_inverted(self.fill_color, self.back_color)
+        if inverted:
+            self.fill_color, self.back_color = self.back_color, self.fill_color
+        else:
+            self.fill_color = "#000000"
+            self.back_color = "#FFFFFF"
+
+        self._update_color_buttons()
+        self._check_contrast()
+        if self.current_qr_data:
+            self._generate_qr()
+
+    def _update_color_buttons(self):
+        self.fill_color_button.configure(
+            fg_color=self.fill_color,
+            hover_color=self._adjust_brightness(self.fill_color, 30)
+        )
+        display_fg = self.back_color if self.back_color != "#FFFFFF" else "#E0E0E0"
+        display_hover = self._adjust_brightness(self.back_color, -30) if self.back_color != "#FFFFFF" else "#D0D0D0"
+        text_clr = "#000000" if self._is_light_color(self.back_color) else "#FFFFFF"
+        self.back_color_button.configure(
+            fg_color=display_fg,
+            hover_color=display_hover,
+            text_color=text_clr
+        )
+
     def _pick_fill_color(self):
         color = colorchooser.askcolor(initialcolor=self.fill_color, title=self.i18n.get("label_fill_color"))
         if color and color[1]:
             self.fill_color = color[1]
-            self.fill_color_button.configure(
-                fg_color=self.fill_color,
-                hover_color=self._adjust_brightness(self.fill_color, 30)
-            )
+            self._update_color_buttons()
+            self._check_contrast()
+            if self.current_qr_data:
+                self._generate_qr()
 
     def _pick_back_color(self):
         color = colorchooser.askcolor(initialcolor=self.back_color, title=self.i18n.get("label_back_color"))
         if color and color[1]:
             self.back_color = color[1]
-            display_fg = self.back_color if self.back_color != "#FFFFFF" else "#E0E0E0"
-            display_hover = self._adjust_brightness(self.back_color, -30) if self.back_color != "#FFFFFF" else "#D0D0D0"
-            text_clr = "#000000" if self._is_light_color(self.back_color) else "#FFFFFF"
-            self.back_color_button.configure(
-                fg_color=display_fg,
-                hover_color=display_hover,
-                text_color=text_clr
-            )
+            self._update_color_buttons()
+            self._check_contrast()
+            if self.current_qr_data:
+                self._generate_qr()
 
     def _select_logo(self):
         file_path = filedialog.askopenfilename(
@@ -413,11 +477,15 @@ class QRCodeGeneratorApp(ctk.CTk):
             logo_name = Path(file_path).name
             self.logo_status_label.configure(text=f"📎 {logo_name}")
             self.remove_logo_button.configure(state="normal")
+            if self.current_qr_data:
+                self._generate_qr()
 
     def _remove_logo(self):
         self.logo_path = None
         self.logo_status_label.configure(text="")
         self.remove_logo_button.configure(state="disabled")
+        if self.current_qr_data:
+            self._generate_qr()
 
     def _get_active_tab_name(self) -> str:
         current_tab = self.tabview.get()
@@ -518,10 +586,21 @@ class QRCodeGeneratorApp(ctk.CTk):
             return
 
         try:
+            if self.current_qr_data:
+                self.current_qr_image = self.qr_engine.generate_qr(
+                    data=self.current_qr_data,
+                    fill_color=self.fill_color,
+                    back_color=self.back_color,
+                    box_size=self.box_size_var.get(),
+                    border=self.border_var.get(),
+                    error_correction=self.error_correction_var.get(),
+                    logo_path=self.logo_path
+                )
+
             if file_format == "png":
                 self.qr_engine.save_as_png(self.current_qr_image, file_path)
             elif file_format == "jpeg":
-                self.qr_engine.save_as_jpeg(self.current_qr_image, file_path)
+                self.qr_engine.save_as_jpeg(self.current_qr_image, file_path, back_color=self.back_color)
             elif file_format == "svg":
                 self.qr_engine.save_as_svg(
                     data=self.current_qr_data,
@@ -530,7 +609,8 @@ class QRCodeGeneratorApp(ctk.CTk):
                     back_color=self.back_color,
                     box_size=self.box_size_var.get(),
                     border=self.border_var.get(),
-                    error_correction=self.error_correction_var.get()
+                    error_correction=self.error_correction_var.get(),
+                    logo_path=self.logo_path
                 )
 
             messagebox.showinfo(
@@ -636,6 +716,8 @@ class QRCodeGeneratorApp(ctk.CTk):
         self.error_correction_label.configure(text=self.i18n.get("label_error_correction"))
         self.logo_button.configure(text=self.i18n.get("btn_select_logo"))
         self.remove_logo_button.configure(text=self.i18n.get("btn_remove_logo"))
+        self.fix_contrast_button.configure(text=self.i18n.get("btn_fix_contrast"))
+        self._check_contrast()
 
         self.generate_button.configure(text=self.i18n.get("btn_generate"))
         self.save_png_button.configure(text=self.i18n.get("btn_save_png"))
