@@ -306,19 +306,20 @@ class QRCodeGeneratorApp(ctk.CTk):
             text="",
             font=ctk.CTkFont(size=12, weight="bold"),
             text_color="#EF4444",
-            wraplength=400
+            wraplength=450
         )
-        self.contrast_warning_label.grid(row=3, column=0, columnspan=3, padx=5, pady=(5, 5), sticky="w")
+        self.contrast_warning_label.grid(row=3, column=0, columnspan=4, padx=8, pady=(4, 2), sticky="w")
 
         self.fix_contrast_button = ctk.CTkButton(
             self.custom_frame,
             text=self.i18n.get("btn_fix_contrast"),
             command=self._fix_color_contrast,
-            height=32,
+            height=34,
+            font=ctk.CTkFont(size=13, weight="bold"),
             fg_color="#D97706",
             hover_color="#B45309"
         )
-        self.fix_contrast_button.grid(row=3, column=3, padx=5, pady=(5, 5), sticky="ew")
+        self.fix_contrast_button.grid(row=4, column=0, columnspan=4, padx=8, pady=(2, 6), sticky="ew")
 
         self._check_contrast()
 
@@ -385,11 +386,16 @@ class QRCodeGeneratorApp(ctk.CTk):
         self.preview_canvas_frame.grid(row=1, column=0, padx=15, pady=(5, 15), sticky="nsew")
         self.preview_canvas_frame.grid_rowconfigure(0, weight=1)
         self.preview_canvas_frame.grid_columnconfigure(0, weight=1)
+        self.preview_canvas_frame.bind("<Configure>", self._on_preview_frame_resize)
 
         self.preview_image_label = ctk.CTkLabel(self.preview_canvas_frame, text="")
         self.preview_image_label.grid(row=0, column=0, padx=10, pady=10)
 
         self._show_placeholder_preview()
+
+    def _on_preview_frame_resize(self, event=None):
+        if hasattr(self, "_current_raw_pil_image") and self._current_raw_pil_image:
+            self._render_scaled_preview(self._current_raw_pil_image)
 
     def _show_placeholder_preview(self):
         placeholder_size = 300
@@ -397,9 +403,20 @@ class QRCodeGeneratorApp(ctk.CTk):
         self._display_preview_image(placeholder)
 
     def _display_preview_image(self, pil_image: Image.Image):
-        preview_size = 350
+        self._current_raw_pil_image = pil_image
+        self._render_scaled_preview(pil_image)
+
+    def _render_scaled_preview(self, pil_image: Image.Image):
+        self.update_idletasks()
+        frame_w = self.preview_canvas_frame.winfo_width()
+        frame_h = self.preview_canvas_frame.winfo_height()
+
+        max_w = max(180, frame_w - 30) if frame_w > 1 else 320
+        max_h = max(180, frame_h - 30) if frame_h > 1 else 320
+        target_size = min(max_w, max_h)
+
         image_copy = pil_image.copy()
-        image_copy.thumbnail((preview_size, preview_size), Image.Resampling.LANCZOS)
+        image_copy.thumbnail((target_size, target_size), Image.Resampling.LANCZOS)
         self.preview_ctk_image = ctk.CTkImage(light_image=image_copy, dark_image=image_copy, size=image_copy.size)
         self.preview_image_label.configure(image=self.preview_ctk_image, text="")
 
