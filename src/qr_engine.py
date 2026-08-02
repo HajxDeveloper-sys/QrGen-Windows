@@ -34,7 +34,6 @@ def calculate_contrast_ratio(fill_color: str, back_color: str) -> float:
 
 
 def is_inverted(fill_color: str, back_color: str) -> bool:
-    """Returns True if foreground is lighter than background (inverted QR code)."""
     return get_relative_luminance(fill_color) > get_relative_luminance(back_color)
 
 
@@ -141,7 +140,6 @@ class QRCodeEngine:
 
         root = svg_img._img
 
-        # Remove physical mm dimensions and set responsive, centered SVG attributes
         root.attrib.pop("width", None)
         root.attrib.pop("height", None)
         root.attrib["viewBox"] = f"0 0 {total_modules} {total_modules}"
@@ -152,7 +150,6 @@ class QRCodeEngine:
         root.attrib["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
         root.attrib["style"] = "width: 100%; height: 100%; max-width: 100%; max-height: 100%; display: block; margin: auto;"
 
-        # 1. Insert background rect covering exact total_modules area
         bg_rect = ET.Element(
             "rect",
             x="0",
@@ -163,12 +160,10 @@ class QRCodeEngine:
         )
         root.insert(0, bg_rect)
 
-        # 2. Update fill color for QR path elements
         for elem in root.iter():
             if str(elem.tag).endswith("path"):
                 elem.set("fill", fill_color)
 
-        # 3. Embed logo in SVG if present
         if logo_path is not None and pathlib.Path(logo_path).exists():
             with open(logo_path, "rb") as f:
                 encoded_logo = base64.b64encode(f.read()).decode("utf-8")
@@ -207,5 +202,6 @@ class QRCodeEngine:
             root.append(logo_elem)
 
         svg_img.save(file_path)
+
 
 
