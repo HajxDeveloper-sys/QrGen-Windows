@@ -52,5 +52,8 @@
   "encryption_wps": "WPS",
   "encryption_open": "Open (No Password)",
   "label_yes": "Yes",
-  "label_no": "No"
+  "label_no": "No",
+  "warn_low_contrast": "⚠️ Low Contrast: Phone cameras may struggle to scan!",
+  "warn_inverted": "⚠️ Inverted Colors: Light QR / Dark Background cannot be scanned by phone cameras!",
+  "btn_fix_contrast": "Fix Colors (Make Scannable)"
 }
