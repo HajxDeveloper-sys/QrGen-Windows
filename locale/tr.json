@@ -52,5 +52,8 @@
   "encryption_wps": "WPS",
   "encryption_open": "Açık (Şifresiz)",
   "label_yes": "Evet",
-  "label_no": "Hayır"
+  "label_no": "Hayır",
+  "warn_low_contrast": "⚠️ Düşük Kontrast: Telefon kameraları okumakta zorlanabilir!",
+  "warn_inverted": "⚠️ Ters Renkler: Açık QR / Koyu Arka Plan telefonlarda taranamaz!",
+  "btn_fix_contrast": "Renkleri Düzenle (Taranabilir Yap)"
 }
