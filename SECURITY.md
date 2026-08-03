@@ -8,7 +8,7 @@
 
 ## Reporting a Vulnerability
 
-Please report vulnerabilities by opening an issue or contacting the maintainers privately. We aim to acknowledge reports within 48 hours.
+Please report security vulnerabilities directly to the project owner and maintainer, **Hasan Aras DEMİR**, by opening a private security issue or contacting the maintainers. We aim to acknowledge reports within 48 hours.
 
 ## Security Scanning
 
