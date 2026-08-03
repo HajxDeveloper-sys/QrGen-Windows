@@ -1,6 +1,6 @@
 # Contributing to QRCodeGenerator
 
-Thank you for your interest in contributing!
+Thank you for your interest in contributing to **QRCodeGenerator Pro**, created and maintained by **Hasan Aras DEMİR**! All accepted contributions will be licensed under the project's MIT License.
 
 ## Development Workflow
 
