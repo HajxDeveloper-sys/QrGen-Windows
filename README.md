@@ -31,7 +31,7 @@ Explore the project documentation for setup, security guidelines, contribution r
 
 ## 📖 Overview / Genel Bakış
 
-**QR Code Generator Pro** is a modern desktop application built with Python 3.12 and `customtkinter`. It allows you to generate and export QR codes for URLs, Plain Text, vCards (Contact Cards), and Wi-Fi networks with dynamic live preview, color customization, logo embedding, and full Turkish/English language support.
+**QR Code Generator Pro** is a modern desktop application created by **Hasan Aras DEMİR** on August 2, 2026 (2 Ağustos 2026 Pazar). Built with Python 3.12 and `customtkinter`, it allows you to generate and export QR codes for URLs, Plain Text, vCards (Contact Cards), and Wi-Fi networks with dynamic live preview, color customization, logo embedding, and full Turkish/English language support.
 
 ---
 
@@ -154,6 +154,11 @@ QRCodeGenerator/
 
 ---
 
-## 📜 License
+## 📜 License & Copyright / Lisans ve Telif Hakkı
+
+Copyright (c) 2026 **Hasan Aras DEMİR**. All rights reserved.
+
+- 👤 **Project Creator & Rights Owner / Proje ve Hak Sahibi**: Hasan Aras DEMİR
+- 📅 **Creation Date / Oluşturulma Tarihi**: 2 Ağustos 2026 Pazar (Sunday, August 2, 2026)
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
