@@ -4,7 +4,7 @@ import datetime
 
 def validate_url(url: str) -> bool:
     parsed = urllib.parse.urlparse(url)
-    return parsed.scheme in ["http", "https"]
+    return parsed.scheme in ["http", "https"] and bool(parsed.netloc)
 
 def sanitize_filename(name: str) -> str:
     return re.sub(r'[\/:*?"<>|]', '_', name)
