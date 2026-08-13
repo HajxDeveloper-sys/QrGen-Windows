@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+
 def get_base_path():
     if getattr(sys, 'frozen', False):
         return Path(sys._MEIPASS)

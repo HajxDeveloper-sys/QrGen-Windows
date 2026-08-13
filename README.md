@@ -31,7 +31,7 @@ Explore the project documentation for setup, security guidelines, contribution r
 
 ## 📖 Overview / Genel Bakış
 
-**QR Code Generator Pro** is a modern desktop application created by **Hasan Aras DEMİR** on August 2, 2026 (2 Ağustos 2026 Pazar). Built with Python 3.12 and `customtkinter`, it allows you to generate and export QR codes for URLs, Plain Text, vCards (Contact Cards), and Wi-Fi networks with dynamic live preview, color customization, logo embedding, and full Turkish/English language support.
+**QR Code Generator Pro** is a modern desktop application created by **Hasan Aras DEMİR** on August 2, 2026 (2 Ağustos 2026 Pazar). Built with Python 3.12 and `customtkinter`, it generates QR codes for URLs, plain text, vCards (contact cards), and Wi-Fi networks with live preview, branded design controls, logo embedding, and Turkish/English support.
 
 ---
 
@@ -42,8 +42,11 @@ Explore the project documentation for setup, security guidelines, contribution r
 - 📇 **vCard 3.0**: Create contact card QR codes (First Name, Last Name, Phone, Email, Company, Title, Website, Address).
 - 📶 **Wi-Fi Network**: Generate scan-to-connect Wi-Fi QR codes (WPA/WPA2/WPA3, WEP, WPA-Enterprise, WPS, and Open networks with hidden SSID support).
 - 🎨 **Color Customization**: Customize QR code color, background color, box size, and border margins.
+- 🪄 **Brand-ready Design**: Choose Classic, Ocean, Sunset, or Midnight presets; then refine module shapes, finder-eye styling, gradients, and logo frames.
 - 🖼️ **Center Logo Embedding**: Add your logo or image to the center of the QR code (automatically sets High `H` error correction).
-- 💾 **Multi-Format Export**: Export in high-resolution **PNG**, **JPEG**, or vector **SVG**.
+- 🩺 **Scan Health**: Clear built-in contrast, quiet-zone, and decoder-based verification feedback before you share a code.
+- 💾 **Multi-Format Export**: Export high-resolution **PNG**, **JPEG**, **WebP**, or **SVG** files. Styled SVG exports preserve the preview appearance.
+- 📋 **Faster Workflow**: Press `Ctrl+Enter` to generate, copy the encoded data in one click, and export controls remain disabled while content is out of date.
 - 🌍 **Bilingual (i18n)**: Switch instantly between **Turkish (TR)** and **English (EN)**.
 - 🌙 **Dark & Light Mode**: Modern interface matching system themes.
 - ⚙️ **TOML Configuration**: Save settings automatically via `config.toml`.
@@ -59,8 +62,8 @@ Explore the project documentation for setup, security guidelines, contribution r
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/QRCodeGenerator.git
-   cd QRCodeGenerator
+   git clone https://github.com/HajxDeveloper-sys/QrGen-Windows.git
+   cd QrGen-Windows
    ```
 
 2. **Automated Setup & Launch**:
@@ -72,8 +75,9 @@ Explore the project documentation for setup, security guidelines, contribution r
 
 3. **Manual Setup**:
    ```bash
-   pip install -r requirements.txt
-   python main.py
+   python -m venv venv
+   venv\Scripts\python -m pip install -r requirements.txt
+   venv\Scripts\python main.py
    ```
 
 ---
@@ -85,8 +89,12 @@ Launch the application using:
 - **Windows Batch**: Double-click `run.bat` (or `run.ps1`)
 - **Command Line**:
   ```bash
-  python main.py
+  venv\Scripts\python main.py
   ```
+
+### Design and scan health
+
+Use the **Design** panel to start from a visual preset or build a custom QR. The Scan Health card reports the lowest contrast, quiet-zone risks, and whether the generated image was independently decoded. A successful decoder check is the strongest signal; a “not independently verified” state means the decoder is unavailable, not that the code is necessarily unsafe. QR Generator saves your selected design defaults locally in `config.toml`.
 
 ---
 

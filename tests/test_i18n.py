@@ -1,5 +1,6 @@
-import pytest
+import json
 from pathlib import Path
+
 from src.i18n import I18nManager
 
 
@@ -27,3 +28,8 @@ class TestI18nManager:
         assert manager.get("app_title") == "QR Code Generator"
         manager.load_language("tr")
         assert manager.get("app_title") == "QR Kod Üreteci"
+
+    def test_english_and_turkish_catalogs_have_the_same_keys(self):
+        en_catalog = json.loads(Path("locale/en.json").read_text(encoding="utf-8"))
+        tr_catalog = json.loads(Path("locale/tr.json").read_text(encoding="utf-8"))
+        assert en_catalog.keys() == tr_catalog.keys()
