@@ -1,16 +1,16 @@
-import pytest
-from pathlib import Path
-from PIL import Image
 import xml.etree.ElementTree as ET
-import base64
+from pathlib import Path
+
+import pytest
+from PIL import Image
 
 from src.qr_engine import (
     QRCodeEngine,
-    parse_color,
     calculate_contrast_ratio,
-    is_inverted,
     get_relative_luminance,
-    suggest_optimal_colors
+    is_inverted,
+    parse_color,
+    suggest_optimal_colors,
 )
 
 
@@ -223,6 +223,26 @@ class TestExportFormats:
         assert "href" in img_elem.attrib
         assert img_elem.attrib.get("{http://www.w3.org/1999/xlink}href") is not None
 
+    def test_save_as_svg_preserves_advanced_style_visuals(self, tmp_path):
+        svg_path = str(tmp_path / "advanced.svg")
+        self.engine.save_as_svg(
+            "Advanced SVG",
+            svg_path,
+            "#0F4C81",
+            "#F7FBFF",
+            module_style="rounded",
+            eye_style="circle",
+            eye_fill_color="#075985",
+            gradient_type="linear_h",
+            gradient_color="#0369A1",
+            logo_shape="rounded",
+        )
+
+        root = ET.parse(svg_path).getroot()
+        images = [element for element in root.iter() if str(element.tag).endswith("image")]
+        assert len(images) == 1
+        assert images[0].attrib["href"].startswith("data:image/png;base64,")
+
     def test_to_base64_svg(self):
         b64_svg = self.engine.to_base64_svg("Base64 SVG Data", "#000000", "#FFFFFF")
         assert isinstance(b64_svg, str) and len(b64_svg) > 50
@@ -287,3 +307,19 @@ class TestScannabilityVerification:
         )
         assert diag_bad["is_inverted"] is True
         assert len(diag_bad["warnings"]) >= 1
+
+    def test_analyze_scannability_checks_gradient_and_eye_colors(self):
+        diagnostics = self.engine.analyze_scannability(
+            "Style diagnostics",
+            "#000000",
+            "#FFFFFF",
+            gradient_type="linear_h",
+            gradient_color="#999999",
+            eye_fill_color="#999999",
+            eye_style="circle",
+            logo_shape="rounded",
+        )
+
+        assert diagnostics["contrast_ratio"] < 4.5
+        assert any("Gradient endpoint" in warning for warning in diagnostics["warnings"])
+        assert any("Finder eye color" in warning for warning in diagnostics["warnings"])

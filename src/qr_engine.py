@@ -1,11 +1,12 @@
-import qrcode
-import qrcode.image.svg
-from PIL import Image, ImageDraw, ImageOps, ImageColor
-import pathlib
-import xml.etree.ElementTree as ET
 import base64
 import io
 import math
+import pathlib
+import xml.etree.ElementTree as ET
+
+import qrcode
+import qrcode.image.svg
+from PIL import Image, ImageColor, ImageDraw
 
 try:
     import zxingcpp
@@ -372,9 +373,53 @@ class QRCodeEngine:
         box_size: int = 10,
         border: int = 4,
         error_correction: str = "M",
-        logo_path: str | None = None
+        logo_path: str | None = None,
+        module_style: str = "square",
+        eye_style: str = "square",
+        eye_fill_color: str | None = None,
+        gradient_type: str | None = None,
+        gradient_color: str | None = None,
+        logo_shape: str = "square"
     ) -> None:
         """Generates clean vector SVG file with viewBox, responsiveness, and optional embedded logo."""
+        has_advanced_style = (
+            module_style != "square"
+            or eye_style != "square"
+            or (eye_fill_color is not None and eye_fill_color != fill_color)
+            or (gradient_type is not None and gradient_color is not None)
+            or logo_shape != "square"
+        )
+
+        if has_advanced_style:
+            rendered = self.generate_qr(
+                data=data,
+                fill_color=fill_color,
+                back_color=back_color,
+                box_size=box_size,
+                border=border,
+                error_correction=error_correction,
+                logo_path=logo_path,
+                module_style=module_style,
+                eye_style=eye_style,
+                eye_fill_color=eye_fill_color,
+                gradient_type=gradient_type,
+                gradient_color=gradient_color,
+                logo_shape=logo_shape
+            )
+            png_bytes = io.BytesIO()
+            rendered.save(png_bytes, format="PNG")
+            encoded = base64.b64encode(png_bytes.getvalue()).decode("ascii")
+            image_size = rendered.width
+            svg_content = (
+                '<?xml version="1.0" encoding="UTF-8"?>\n'
+                f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {image_size} {image_size}" '
+                'width="100%" height="100%" preserveAspectRatio="xMidYMid meet">'
+                f'<image width="{image_size}" height="{image_size}" '
+                f'href="data:image/png;base64,{encoded}"/></svg>'
+            )
+            pathlib.Path(file_path).write_text(svg_content, encoding="utf-8")
+            return
+
         error_map = {
             'L': qrcode.constants.ERROR_CORRECT_L,
             'M': qrcode.constants.ERROR_CORRECT_M,
@@ -477,7 +522,6 @@ class QRCodeEngine:
         logo_path: str | None = None
     ) -> str:
         """Generates SVG content and returns it as a Base64 string."""
-        buf = io.BytesIO()
         temp_path = "_temp_qr_export.svg"
         self.save_as_svg(
             data, temp_path, fill_color, back_color, box_size, border, error_correction, logo_path
@@ -523,7 +567,7 @@ class QRCodeEngine:
                     "engine": "zxingcpp",
                     "error": "No barcode recognized by decoder"
                 }
-        except Exception as e:
+        except (zxingcpp.Error, OSError, RuntimeError, ValueError) as e:
             return {
                 "scannable": False,
                 "decoded_text": None,
@@ -540,7 +584,12 @@ class QRCodeEngine:
         border: int = 4,
         error_correction: str = "M",
         logo_path: str | None = None,
-        module_style: str = "square"
+        module_style: str = "square",
+        eye_style: str = "square",
+        eye_fill_color: str | None = None,
+        gradient_type: str | None = None,
+        gradient_color: str | None = None,
+        logo_shape: str = "square"
     ) -> dict:
         """
         Performs a full diagnostic of the QR setup before rendering.
@@ -564,14 +613,33 @@ class QRCodeEngine:
             warnings.append(f"Low contrast ratio ({ratio:.2f}:1). Recommended contrast ratio is >= 4.5:1 for easy camera reading.")
             recommendations.append("Increase contrast between fill and background color.")
 
+        if gradient_type and gradient_color:
+            gradient_ratio = calculate_contrast_ratio(gradient_color, back_color)
+            if gradient_ratio < 4.5:
+                score -= 15
+                warnings.append(
+                    f"Gradient endpoint has low contrast ({gradient_ratio:.2f}:1) against the background."
+                )
+                recommendations.append("Choose a darker or higher-contrast gradient endpoint.")
+            ratio = min(ratio, gradient_ratio)
+
+        if eye_fill_color:
+            eye_ratio = calculate_contrast_ratio(eye_fill_color, back_color)
+            if eye_ratio < 4.5:
+                score -= 15
+                warnings.append(
+                    f"Finder eye color has low contrast ({eye_ratio:.2f}:1) against the background."
+                )
+                recommendations.append("Choose a higher-contrast finder eye color.")
+            ratio = min(ratio, eye_ratio)
+
         if border < 4:
             score -= 15
             warnings.append(f"Quiet zone border is small ({border} modules). Minimum standard quiet zone is 4 modules.")
             recommendations.append("Increase border to 4 or higher.")
 
-        if logo_path is not None:
-            if error_correction.upper() in ('L', 'M'):
-                recommendations.append("Using logo: Automatically upgraded error correction level to 'H' for damage recovery.")
+        if logo_path is not None and error_correction.upper() in ('L', 'M'):
+            recommendations.append("Using logo: Automatically upgraded error correction level to 'H' for damage recovery.")
 
         img = self.generate_qr(
             data=data,
@@ -581,7 +649,12 @@ class QRCodeEngine:
             border=border,
             error_correction=error_correction,
             logo_path=logo_path,
-            module_style=module_style
+            module_style=module_style,
+            eye_style=eye_style,
+            eye_fill_color=eye_fill_color,
+            gradient_type=gradient_type,
+            gradient_color=gradient_color,
+            logo_shape=logo_shape
         )
 
         scan_info = self.check_scannability(img)
