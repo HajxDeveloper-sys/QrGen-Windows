@@ -1,4 +1,4 @@
-# 🚀 QR Code Generator Pro
+# QR Studio for Windows
 
 <p align="center">
   <img src="assets/icon.png" alt="QR Code Generator Icon" width="180" />
@@ -31,7 +31,7 @@ Explore the project documentation for setup, security guidelines, contribution r
 
 ## 📖 Overview / Genel Bakış
 
-**QR Code Generator Pro** is a modern desktop application created by **Hasan Aras DEMİR** on August 2, 2026 (2 Ağustos 2026 Pazar). Built with Python 3.12 and `customtkinter`, it allows you to generate and export QR codes for URLs, Plain Text, vCards (Contact Cards), and Wi-Fi networks with dynamic live preview, color customization, logo embedding, and full Turkish/English language support.
+**QR Studio** is a privacy-first Windows desktop application built with Python 3.12 and `customtkinter`. It creates QR codes for URLs, text, contact cards and Wi-Fi networks without sending data to an external service.
 
 ---
 
@@ -46,6 +46,11 @@ Explore the project documentation for setup, security guidelines, contribution r
 - 💾 **Multi-Format Export**: Export in high-resolution **PNG**, **JPEG**, or vector **SVG**.
 - 🌍 **Bilingual (i18n)**: Switch instantly between **Turkish (TR)** and **English (EN)**.
 - 🌙 **Dark & Light Mode**: Modern interface matching system themes.
+- ⚡ **Live Preview**: Debounced previews update as content or design settings change.
+- 🧩 **Advanced Styling**: Square, rounded, circle, dot and gapped modules; custom corner and logo shapes; horizontal, vertical and radial gradients.
+- ✅ **Readability Score**: Live contrast, quiet-zone and scan-safety diagnostics before export.
+- 📦 **Extended Export**: PNG, JPEG, SVG and WebP from one focused export bar.
+- 📋 **Fast Workflow**: Copy the encoded payload, clear the form and reset the design in one click; use `Ctrl+Enter` to generate and `Ctrl+S` to save PNG.
 - ⚙️ **TOML Configuration**: Save settings automatically via `config.toml`.
 - 🔒 **SAST & Security Audited**: Audited with `bandit`, `pip-audit`, and `ruff`.
 
@@ -59,8 +64,8 @@ Explore the project documentation for setup, security guidelines, contribution r
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/QRCodeGenerator.git
-   cd QRCodeGenerator
+   git clone https://github.com/HajxDeveloper-sys/QrGen-Windows.git
+   cd QrGen-Windows
    ```
 
 2. **Automated Setup & Launch**:

@@ -29,6 +29,12 @@ class ConfigManager:
         self.config[section][key] = value
         self.save()
 
+    def update_section(self, section: str, values: dict) -> None:
+        if section not in self.config:
+            self.config[section] = {}
+        self.config[section].update(values)
+        self.save()
+
     def get_default_config(self) -> dict:
         return {
             "app": {
@@ -41,6 +47,11 @@ class ConfigManager:
                 "border": 4,
                 "error_correction": "M",
                 "fill_color": "#000000",
-                "back_color": "#FFFFFF"
+                "back_color": "#FFFFFF",
+                "module_style": "square",
+                "eye_style": "square",
+                "gradient_type": "none",
+                "gradient_color": "#7C3AED",
+                "logo_shape": "rounded"
             }
         }

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2026-08-13
+
+### Added
+
+- Rebuilt the application shell as QR Studio with stronger visual hierarchy and a dedicated live-preview workspace.
+- Added automatic debounced previews, readability scoring, contrast diagnostics and output metadata.
+- Exposed module, finder-eye, gradient and logo-shape controls already supported by the rendering engine.
+- Added WebP export, clipboard payload copy, form clearing, design reset and keyboard shortcuts.
+- Added Wi-Fi password visibility and persistent advanced design preferences.
+
+### Fixed
+
+- Repaired Turkish interface text and refreshed both translation dictionaries.
+- Corrected the repository clone URL in the setup guide.
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 

@@ -6,11 +6,11 @@ from src.i18n import I18nManager
 class TestI18nManager:
     def test_load_english(self):
         manager = I18nManager(locale_dir="locale", default_language="en")
-        assert manager.get("app_title") == "QR Code Generator"
+        assert manager.get("app_title") == "QR Studio"
 
     def test_load_turkish(self):
         manager = I18nManager(locale_dir="locale", default_language="tr")
-        assert manager.get("app_title") == "QR Kod Üreteci"
+        assert manager.get("app_title") == "QR Studio"
 
     def test_missing_key_returns_key(self):
         manager = I18nManager(locale_dir="locale", default_language="en")
@@ -24,6 +24,6 @@ class TestI18nManager:
 
     def test_language_switch(self):
         manager = I18nManager(locale_dir="locale", default_language="en")
-        assert manager.get("app_title") == "QR Code Generator"
+        assert manager.get("app_title") == "QR Studio"
         manager.load_language("tr")
-        assert manager.get("app_title") == "QR Kod Üreteci"
+        assert manager.get("app_title") == "QR Studio"
