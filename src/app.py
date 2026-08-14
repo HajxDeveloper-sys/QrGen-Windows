@@ -61,7 +61,7 @@ class QRCodeGeneratorApp(ctk.CTk):
     def _setup_window(self):
         self.title(self.i18n.get("app_title"))
         self.geometry("1240x840")
-        self.minsize(1060, 740)
+        self.minsize(900, 620)
 
         self._apply_window_icon()
 
@@ -122,7 +122,13 @@ class QRCodeGeneratorApp(ctk.CTk):
         self.live_badge_label.grid(row=0, column=1, rowspan=2, sticky="e")
 
     def _build_left_panel(self):
-        self.left_frame = ctk.CTkFrame(self, corner_radius=15)
+        self.left_frame = ctk.CTkScrollableFrame(
+            self,
+            corner_radius=15,
+            orientation="vertical",
+            scrollbar_button_color=("gray65", "gray35"),
+            scrollbar_button_hover_color=("gray50", "gray50")
+        )
         self.left_frame.grid(row=1, column=0, padx=(15, 7), pady=15, sticky="nsew")
         self.left_frame.grid_rowconfigure(1, weight=1)
         self.left_frame.grid_columnconfigure(0, weight=1)
